@@ -1,13 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
+import { Address, AddressInput } from "~~/components/scaffold-eth";
+import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
+  const [newDelegate, setNewDelegate] = useState("");
   const { address: connectedAddress } = useAccount();
+
+  const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract("YourContract");
+
+  const onChangeDelegate = async () => {
+    try {
+      await writeYourContractAsync({
+        functionName: "setDelegate",
+        args: [newDelegate],
+      });
+    } catch (e) {
+      console.error("Error setting greeting:", e);
+    }
+  };
+
+  const { data: delegate } = useScaffoldReadContract({
+    contractName: "YourContract",
+    functionName: "delegate",
+  });
 
   return (
     <>
@@ -21,23 +42,20 @@ const Home: NextPage = () => {
             <p className="my-2 font-medium">Connected Address:</p>
             <Address address={connectedAddress} />
           </div>
-
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
+          <div className="flex justify-center items-center space-x-2 flex-col sm:flex-row">
+            <p className="my-2 font-medium">Delegate Address:</p>
+            <Address address={delegate} />
+          </div>
+          <div className="flex justify-center items-center space-x-2 flex-col sm:flex-row">
+            <p className="my-2 font-medium">Delegate Address:</p>
+            <AddressInput
+              value={newDelegate}
+              onChange={e => {
+                setNewDelegate(e);
+              }}
+            />
+          </div>
+          <button onClick={onChangeDelegate}>Set</button>
         </div>
 
         <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">

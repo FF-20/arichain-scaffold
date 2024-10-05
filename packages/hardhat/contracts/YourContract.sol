@@ -13,12 +13,17 @@ import "hardhat/console.sol";
  * @author BuidlGuidl
  */
 contract YourContract {
+	address public delegate;
 	// State Variables
 	address public immutable owner;
 	string public greeting = "Building Unstoppable Apps!!!";
 	bool public premium = false;
 	uint256 public totalCounter = 0;
 	mapping(address => uint) public userGreetingCounter;
+
+	function setDelegate(address _delegate) public {
+		delegate = _delegate;
+	}
 
 	// Events: a way to emit log statements from smart contract that can be listened to by external parties
 	event GreetingChange(
